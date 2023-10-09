@@ -1,28 +1,31 @@
 <script setup>
-import { Modal } from 'ant-design-vue'
+import { Modal, Tag } from 'ant-design-vue'
+import { QuestionCircleOutlined } from '@ant-design/icons-vue'
+import dayjs from 'dayjs'
 import TodoList from './components/todo-list.vue'
 import ShortcutKey from './components/shortcut-key.vue'
 
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 const open = ref(false)
 
 const showModal = () => {
   open.value = true
 }
-
-const handleOk = (e) => {
-  console.log(e)
-  open.value = false
-}
+const today = computed(() => dayjs().format('YYYY-MM-DD'))
 </script>
 
 <template>
   <div class="main">
-    <header>Todo List</header>
+    <header>
+      <Tag :bordered="false">{{ today }}</Tag>
+      待办事项
+    </header>
     <TodoList class="listBox"></TodoList>
 
-    <div class="tipBox" @click="showModal">操作提示</div>
-    <Modal v-model:open="open" title="操作按键">
+    <div class="tipBox" title="快捷键提示" @click="showModal">
+      <QuestionCircleOutlined style="font-size: 20px" />
+    </div>
+    <Modal v-model:open="open" title="快捷键" :footer="null">
       <ShortcutKey></ShortcutKey>
     </Modal>
   </div>

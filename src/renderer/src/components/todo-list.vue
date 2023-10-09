@@ -1,6 +1,11 @@
 <template>
   <div class="list">
-    <ShortcutKey v-if="isEmpty" class="shortcutBox"></ShortcutKey>
+    <template v-if="isEmpty">
+      <ShortcutKey class="shortcutBox"></ShortcutKey>
+      <div class="addBox">
+        <Button type="primary" @click="handleAdd">创建待办项</Button>
+      </div>
+    </template>
     <template v-else>
       <div
         v-for="(item, index) in list"
@@ -15,14 +20,20 @@
           :item="item"
           :serialNum="index + 1"
           @enterChange="(raw) => handleEnterChange(item, raw)"
+          @deleteChange="(raw) => handleDeleteChange(item, raw)"
         ></TodoItem>
+      </div>
+      <div v-if="isAdd" class="addBox-list">
+        <PlusCircleOutlined @click="handleAdd" />
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, createVNode } from 'vue'
+import { Button, Modal, message } from 'ant-design-vue'
+import { ExclamationCircleOutlined, PlusCircleOutlined } from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
 import TodoItem from './todo-item.vue'
 import ShortcutKey from './shortcut-key.vue'
@@ -30,9 +41,15 @@ import ShortcutKey from './shortcut-key.vue'
 const list = ref([])
 
 const isEmpty = computed(() => !list.value.length)
+const isAdd = computed(() => {
+  return !list.value[list.value.length - 1].isEdit
+})
 
 function handleAdd() {
-  if (list.value.length >= 9) return
+  if (list.value.length >= 9) {
+    message.warning('最多只能新建9项')
+    return
+  }
   list.value.push({
     id: Math.random() * 100,
     name: '',
@@ -51,9 +68,30 @@ function handleDelete(index) {
 }
 
 function handleEnterChange(item, raw) {
-  if (!item.name) return
+  if (!item.name) {
+    message.warning('请输入待办内容')
+    return
+  }
   item.isEdit = raw.isEdit
   handleAdd()
+}
+function handleDeleteChange(item, raw) {
+  if (item.isFinish) return
+  if (raw.isEdit) {
+    handleDelete(raw.index)
+  } else {
+    Modal.confirm({
+      title: '你确认要删除当前待办项吗？',
+      icon: createVNode(ExclamationCircleOutlined),
+      content: createVNode('div', { style: 'color:red;' }, item.name),
+      onOk() {
+        handleDelete(raw.index)
+      },
+      onCancel() {
+        console.log('Cancel')
+      }
+    })
+  }
 }
 
 let activeRow = ref(0)
@@ -126,14 +164,25 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
   }
+  .addBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .addBox-list {
+    position: absolute;
+    top: -40px;
+    right: 6px;
+  }
   .item-row {
     line-height: 34px;
-    border: 1px solid transparent;
     border-radius: 4px;
     margin-bottom: 4px;
+    box-sizing: border-box;
+    padding: 0 6px;
   }
   .active-row {
-    border-color: #1677ff;
+    background: linear-gradient(70deg, rgba(77, 162, 203, 0.5), rgba(103, 178, 111, 0.8));
   }
   .finish-row {
     color: #999;

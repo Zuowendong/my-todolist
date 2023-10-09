@@ -4,7 +4,7 @@
       <Col :span="8">{{ item.label }}</Col>
       <Col :span="16">
         <Tag>{{ item.value1 }}</Tag>
-        <span v-if="item.value2">+</span>
+        <span v-if="item.value2" class="unit">+</span>
         <Tag v-if="item.value2"> {{ item.value2 }}</Tag>
       </Col>
     </Row>
@@ -30,5 +30,8 @@ const keyItems = ref([
   min-width: 220px;
   line-height: 32px;
   color: #666;
+}
+.unit {
+  margin-right: 5px;
 }
 </style>
