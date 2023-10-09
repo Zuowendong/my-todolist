@@ -1,0 +1,70 @@
+body {
+  width: 100vw;
+  height: 100vh;
+  font-family:
+    Roboto,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Helvetica Neue',
+    'Segoe UI',
+    'Oxygen',
+    'Ubuntu',
+    'Cantarell',
+    'Open Sans',
+    sans-serif;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  color: #9feaf9;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  outline: none;
+}
+
+a:hover {
+  border-bottom: 1px solid;
+}
+
+#app {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  padding: 15px 30px 0 30px;
+}
+
+.main {
+  height: 100%;
+  position: relative;
+  header {
+    height: 60px;
+    line-height: 60px;
+  }
+  .listBox {
+    height: calc(100% - 60px);
+  }
+  .tipBox {
+    position: absolute;
+    bottom: 10px;
+    right: 0px;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 20px;
+    background-color: #ccc;
+    border-radius: 50%;
+    padding: 6px;
+    color: #fff;
+    cursor: pointer;
+  }
+}
