@@ -13,6 +13,10 @@
     </div>
 
     <div v-else class="show-item">
+      <div class="prefix">
+        <SmileOutlined v-if="item.isFinish" style="color: #29aa1d" @click="handleFinished(false)" />
+        <MehOutlined v-else @click="handleFinished(true)" />
+      </div>
       <span>{{ serialNum }}、</span>
       <span> {{ item.name }}</span>
       <span class="time"> Create at {{ item.time }}</span>
@@ -26,7 +30,12 @@
 <script setup>
 import { onMounted, ref, toRefs } from 'vue'
 import { Input } from 'ant-design-vue'
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons-vue'
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  MehOutlined,
+  SmileOutlined
+} from '@ant-design/icons-vue'
 
 const props = defineProps({
   item: {
@@ -40,7 +49,7 @@ const props = defineProps({
 })
 
 const { item, serialNum } = toRefs(props)
-const emits = defineEmits(['enterChange', 'deleteChange'])
+const emits = defineEmits(['enterChange', 'deleteChange', 'finishChange'])
 
 function handleInput() {
   emits('enterChange', { isEdit: false })
@@ -50,6 +59,9 @@ function handleDelete(isEdit) {
     index: serialNum.value - 1,
     isEdit
   })
+}
+function handleFinished(isFinish) {
+  emits('finishChange', { isFinish })
 }
 
 const inputRef = ref()
@@ -68,11 +80,16 @@ onMounted(() => {
 }
 .show-item {
   display: grid;
-  grid-template-columns: 30px auto 130px 30px;
+  grid-template-columns: 30px 30px auto 130px 30px;
+  grid-auto-rows: minmax(32px, auto);
   align-items: center;
   .time {
     font-size: 12px;
     color: #666;
+  }
+  .prefix {
+    display: flex;
+    justify-content: flex-start;
   }
   .icon {
     display: flex;

@@ -21,6 +21,7 @@
           :serialNum="index + 1"
           @enterChange="(raw) => handleEnterChange(item, raw)"
           @deleteChange="(raw) => handleDeleteChange(item, raw)"
+          @finishChange="(raw) => handleFinishChange(item, raw)"
         ></TodoItem>
       </div>
       <div v-if="isAdd" class="addBox-list">
@@ -92,6 +93,10 @@ function handleDeleteChange(item, raw) {
       }
     })
   }
+}
+function handleFinishChange(item, raw) {
+  console.log('🔥🔥🔥🔥🔥🔥', item, raw)
+  item.isFinish = raw.isFinish
 }
 
 let activeRow = ref(0)
