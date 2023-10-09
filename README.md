@@ -2,33 +2,16 @@
 
 An Electron application with Vue
 
-## Recommended IDE Setup
+## features
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
-
-## Project Setup
-
-### Install
-
-```bash
-$ pnpm install
-```
-
-### Development
-
-```bash
-$ pnpm dev
-```
-
-### Build
-
-```bash
-# For windows
-$ pnpm build:win
-
-# For macOS
-$ pnpm build:mac
-
-# For Linux
-$ pnpm build:linux
-```
+1. 待办清单 🉑
+2. 待办项可编辑 🚫
+3. 快捷键操作 🉑
+4. 本地存储 🉑
+   1. 地址可修改 🉑
+   2. 本地存储，保存日志文件夹路径数据 🚫
+   3. 安装时指定路径创建文件夹作为初始文件存储路径 🚫
+   4. 当日创建首个待办项时创建文件，文件以当天日期为名`2023-10-09.txt` 🚫
+   5. 更新今日待办，新增或编辑都修改本地文件 🚫
+5. 文件目录栏，读取日志文件夹 🚫
+6. 切换每日待办，读取相应文件内容 🚫
