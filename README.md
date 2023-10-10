@@ -5,7 +5,7 @@ An Electron application with Vue
 ## features
 
 1. 待办清单 🉑
-2. 待办项可编辑 🚫
+2. 待办项可编辑 🉑
 3. 快捷键操作 🉑
 4. 本地存储
    1. 地址可修改 🉑
