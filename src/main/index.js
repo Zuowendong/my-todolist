@@ -7,7 +7,7 @@ import { writeFile } from './file'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    width: 540,
+    width: 666,
     height: 500,
     show: false,
     // alwaysOnTop: true,
@@ -57,6 +57,7 @@ app.whenReady().then(() => {
 
   createWindow()
 
+  console.log('init')
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })

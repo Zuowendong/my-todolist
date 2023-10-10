@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { Modal, Tag, Tabs, TabPane, Button } from 'ant-design-vue'
-import { QuestionCircleOutlined } from '@ant-design/icons-vue'
+import { Modal, Tag, Tabs, TabPane, Button, Row, Col } from 'ant-design-vue'
+import { QuestionCircleOutlined, SnippetsOutlined } from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
 import TodoList from './components/todo-list.vue'
 import ShortcutKey from './components/shortcut-key.vue'
@@ -33,19 +33,39 @@ function openFile() {
   if (!fileUrl.value) return
   window.electronFile.setFileUrl(fileUrl.value)
 }
+
+let isFileCatalog = ref(false)
+function showFileCatalog() {
+  isFileCatalog.value = !isFileCatalog.value
+  console.log('🔥🔥🔥🔥🔥🔥')
+}
 </script>
 
 <template>
   <div class="main">
-    <header @click="handle">
-      <Tag :bordered="false">{{ today }}</Tag>
-      待办事项
-    </header>
-    <TodoList class="listBox" :fileUrl="fileUrl"></TodoList>
+    <Row style="height: 100%">
+      <Col flex="30px" class="centerCol">
+        <SnippetsOutlined
+          :class="['icon', isFileCatalog ? 'activeIcon' : '']"
+          @click="showFileCatalog"
+        />
+        <QuestionCircleOutlined :class="['icon', open ? 'activeIcon' : '']" @click="showModal" />
+      </Col>
+      <Col v-if="isFileCatalog" flex="100px" class="centerCol">
+        <div class="fileName">2023-10-07.txt</div>
+        <div class="fileName">2023-10-08.txt</div>
+        <div class="fileName">2023-10-09.txt</div>
+        <div class="fileName">2023-10-10.txt</div>
+      </Col>
+      <Col flex="auto" class="contentCol">
+        <header @click="handle">
+          <Tag :bordered="false">{{ today }}</Tag>
+          待办事项
+        </header>
+        <TodoList class="listBox" :fileUrl="fileUrl"></TodoList>
+      </Col>
+    </Row>
 
-    <div class="tipBox" title="快捷键提示" @click="showModal">
-      <QuestionCircleOutlined style="font-size: 20px" />
-    </div>
     <Modal v-model:open="open" title="帮助" :footer="null">
       <Tabs v-model:activeKey="activeKey">
         <TabPane key="1" tab="文件管理">
@@ -69,6 +89,44 @@ function openFile() {
 <style lang="less">
 @import './assets/css/app.less';
 
+.main {
+  height: 100%;
+  position: relative;
+  overflow: auto;
+  box-sizing: border-box;
+  header {
+    height: 60px;
+    line-height: 60px;
+  }
+  .listBox {
+    height: calc(100% - 60px);
+  }
+}
+
+.centerCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+  box-shadow: 1px 0px 2px 0px #ccc;
+  .icon {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #aaa;
+  }
+  .activeIcon {
+    color: #333;
+  }
+  .fileName {
+    font-size: 12px;
+    line-height: 30px;
+    cursor: pointer;
+  }
+}
+.contentCol {
+  box-sizing: border-box;
+  padding-left: 10px;
+}
 .file-manage {
   height: 192px;
   display: flex;

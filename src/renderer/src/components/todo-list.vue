@@ -169,23 +169,13 @@ function shortcutEvent() {
       removeLastAdd()
     }
 
-    if (e.ctrlKey && e.key == 'i') {
-      handleAdd()
-    }
-
-    if (e.ctrlKey && e.key == 'Delete') {
-      handleEmpty()
-    }
-
+    if (e.ctrlKey && e.key == 'i') handleAdd()
+    if (e.ctrlKey && e.key == 'Delete') handleEmpty()
     activedNumKey(e)
 
     if (activeRow.value) {
-      if (activeRow.value !== 1 && e.key == 'ArrowUp') {
-        activeRow.value--
-      }
-      if (activeRow.value !== list.value.length && e.key == 'ArrowDown') {
-        activeRow.value++
-      }
+      if (activeRow.value !== 1 && e.key == 'ArrowUp') activeRow.value--
+      if (activeRow.value !== list.value.length && e.key == 'ArrowDown') activeRow.value++
 
       if (e.key == 'Delete') {
         handleDelete(activeRow.value - 1)
@@ -193,7 +183,7 @@ function shortcutEvent() {
       }
 
       if (e.key == 'Enter') {
-        const target = list.value.find((item, index) => index + 1 == activeRow.value)
+        const target = list.value.find((_, index) => index + 1 == activeRow.value)
         target.isFinish = true
       }
     }
