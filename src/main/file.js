@@ -13,7 +13,9 @@ export function writeFile({ fileUrl, time, content }) {
 }
 
 export function getAllFileName(folderPath) {
-  return fs.readdirSync(folderPath)
+  if (fs.existsSync(folderPath)) {
+    return fs.readdirSync(folderPath)
+  }
 }
 
 export function readFile(filePath) {
