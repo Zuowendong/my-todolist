@@ -14,7 +14,8 @@ if (process.contextIsolated) {
 
     contextBridge.exposeInMainWorld('electronFile', {
       setFileUrl: (path) => ipcRenderer.send('dialog:openFile', path),
-      exportFile: (data) => ipcRenderer.send('exportFile', data)
+      exportFile: (data) => ipcRenderer.send('exportFile', data),
+      readFile: (data) => ipcRenderer.send('readFile', data)
     })
   } catch (error) {
     console.error(error)

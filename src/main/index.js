@@ -1,9 +1,8 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'node:path'
-import fs from 'node:fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { writeFile } from './file'
+import { writeFile, getAllFileName, readFile } from './file'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -30,6 +29,13 @@ function createWindow() {
     const filePath = join(fileUrl, `${time}.txt`)
     writeFile(data)
     // shell.openPath(filePath)
+  })
+  ipcMain.on('readFile', (event, data) => {
+    console.log('🔥🔥🔥🔥🔥🔥', data)
+    let res = getAllFileName(data)
+    console.log('🔥🔥🔥🔥🔥🔥', res)
+
+    event.sender.send('fileNames', res)
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -58,6 +64,7 @@ app.whenReady().then(() => {
   createWindow()
 
   console.log('init')
+
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })

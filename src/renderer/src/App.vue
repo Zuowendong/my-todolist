@@ -16,9 +16,14 @@ function showModal() {
 }
 
 let fileUrl = ref('')
-
+let fileNames = ref([])
 onMounted(() => {
   fileUrl.value = window.localStorage.getItem('fileUrl') || ''
+
+  window.electronFile.readFile(fileUrl.value)
+  window.electron.ipcRenderer.on('fileNames', (_, names) => {
+    fileNames.value = names
+  })
 })
 
 function changeFileStorage() {
@@ -52,10 +57,7 @@ function showFileCatalog() {
         <QuestionCircleOutlined :class="['icon', open ? 'activeIcon' : '']" @click="showModal" />
       </Col>
       <Col v-if="isFileCatalog" flex="100px" class="centerCol">
-        <div class="fileName">2023-10-07.txt</div>
-        <div class="fileName">2023-10-08.txt</div>
-        <div class="fileName">2023-10-09.txt</div>
-        <div class="fileName">2023-10-10.txt</div>
+        <div v-for="(item, index) in fileNames" :key="index" class="fileName">{{ item }}</div>
       </Col>
       <Col flex="auto" class="contentCol">
         <header @click="handle">
