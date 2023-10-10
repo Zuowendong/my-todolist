@@ -25,17 +25,23 @@ function createWindow() {
   ipcMain.handle('dialog:changeFile', handleFileOpen)
 
   ipcMain.on('exportFile', (_, data) => {
-    const { fileUrl, time } = data
-    const filePath = join(fileUrl, `${time}.txt`)
+    // const { fileUrl, time } = data
+    // const filePath = join(fileUrl, `${time}.txt`)
     writeFile(data)
     // shell.openPath(filePath)
   })
-  ipcMain.on('readFile', (event, data) => {
-    console.log('🔥🔥🔥🔥🔥🔥', data)
+  ipcMain.on('readFileNames', (event, data) => {
     let res = getAllFileName(data)
-    console.log('🔥🔥🔥🔥🔥🔥', res)
-
     event.sender.send('fileNames', res)
+  })
+  ipcMain.on('readFile', (event, path) => {
+    console.log('🔥🔥🔥🔥🔥🔥', path)
+
+    readFile(path).then((res) => {
+      console.log('🔥🔥🔥🔥🔥🔥', res)
+
+      event.sender.send('fileContent', res)
+    })
   })
 
   mainWindow.on('ready-to-show', () => {

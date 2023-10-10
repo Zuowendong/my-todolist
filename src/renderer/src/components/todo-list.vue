@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, createVNode, toRefs } from 'vue'
+import { computed, onMounted, ref, createVNode, toRefs, watch } from 'vue'
 import { Button, Modal, message } from 'ant-design-vue'
 import {
   ExclamationCircleOutlined,
@@ -49,11 +49,42 @@ const props = defineProps({
   fileUrl: {
     type: String,
     default: ''
+  },
+  originList: {
+    type: Array,
+    default: () => []
+  },
+  fileTime: {
+    type: String,
+    default: ''
   }
 })
-const { fileUrl } = toRefs(props)
+const { fileUrl, fileTime } = toRefs(props)
 
-const list = ref([])
+let list = ref([])
+watch(
+  () => props.originList,
+  (_list) => {
+    if (_list && _list.length) {
+      list.value = _list
+        .filter((item) => item)
+        .map((item) => {
+          const isFinish = item.split('')[0] == '√'
+          const name = item.substring(1).split('->')[0].trim().substring(2)
+          const time = item.split('->')[1]
+
+          return {
+            id: Math.random() * 100,
+            name,
+            time: time ? `${fileTime.value.substring(5)} ${time}` : '',
+            isEdit: false,
+            isFinish
+          }
+        })
+    }
+  },
+  { immediate: true }
+)
 
 const isEmpty = computed(() => !list.value.length)
 const isAdd = computed(() => {
@@ -151,14 +182,14 @@ function handleExport() {
   const content = list.value
     .filter((item) => !item.isEdit)
     .map((item, index) => {
-      return `${index + 1}.${item.name} (${item.isFinish ? '已完成' : '未完成'})\n`
+      const time = item.time.split(' ')[1]
+      return `${item.isFinish ? '√' : '×'} ${index + 1}.${item.name} ->${time}\n`
     })
 
-  const today = dayjs().format('YYYY-MM-DD')
   window.electronFile.exportFile({
     fileUrl: fileUrl.value,
-    time: today,
-    content: `${today}待办事项\n${content.join('')}`
+    time: fileTime.value,
+    content: `${fileTime.value}待办事项\n${content.join('')}`
   })
 }
 

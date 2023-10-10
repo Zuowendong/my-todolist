@@ -6,8 +6,6 @@ import dayjs from 'dayjs'
 import TodoList from './components/todo-list.vue'
 import ShortcutKey from './components/shortcut-key.vue'
 
-const today = computed(() => dayjs().format('YYYY-MM-DD'))
-
 let open = ref(false)
 let activeKey = ref('1')
 function showModal() {
@@ -17,12 +15,25 @@ function showModal() {
 
 let fileUrl = ref('')
 let fileNames = ref([])
+let activeFileId = ref(0)
+let fileContent = ref([])
+
 onMounted(() => {
   fileUrl.value = window.localStorage.getItem('fileUrl') || ''
 
-  window.electronFile.readFile(fileUrl.value)
+  window.electronFile.readFileNames(fileUrl.value)
   window.electron.ipcRenderer.on('fileNames', (_, names) => {
-    fileNames.value = names
+    fileNames.value = names.map((item, index) => {
+      return {
+        id: index + 1,
+        name: item
+      }
+    })
+  })
+
+  window.electron.ipcRenderer.on('fileContent', (_, data) => {
+    fileContent.value = data.split('\n')
+    fileContent.value.splice(0, 1)
   })
 })
 
@@ -42,8 +53,18 @@ function openFile() {
 let isFileCatalog = ref(false)
 function showFileCatalog() {
   isFileCatalog.value = !isFileCatalog.value
-  console.log('🔥🔥🔥🔥🔥🔥')
 }
+
+let fileTime = ref('')
+function switchFile(item) {
+  activeFileId.value = item.id
+  fileTime.value = item.name.split('.')[0]
+  window.electronFile.readFile(`${fileUrl.value}\\${item.name}`)
+}
+
+const today = computed(() => {
+  return fileTime.value || dayjs().format('YYYY-MM-DD')
+})
 </script>
 
 <template>
@@ -57,14 +78,26 @@ function showFileCatalog() {
         <QuestionCircleOutlined :class="['icon', open ? 'activeIcon' : '']" @click="showModal" />
       </Col>
       <Col v-if="isFileCatalog" flex="100px" class="centerCol">
-        <div v-for="(item, index) in fileNames" :key="index" class="fileName">{{ item }}</div>
+        <div
+          v-for="item in fileNames"
+          :key="item.id"
+          :class="['fileName', item.id === activeFileId ? 'activeFile' : '']"
+          @click="switchFile(item)"
+        >
+          {{ item.name }}
+        </div>
       </Col>
       <Col flex="auto" class="contentCol">
         <header @click="handle">
           <Tag :bordered="false">{{ today }}</Tag>
           待办事项
         </header>
-        <TodoList class="listBox" :fileUrl="fileUrl"></TodoList>
+        <TodoList
+          class="listBox"
+          :fileUrl="fileUrl"
+          :originList="fileContent"
+          :fileTime="fileTime"
+        ></TodoList>
       </Col>
     </Row>
 
@@ -96,6 +129,7 @@ function showFileCatalog() {
   position: relative;
   overflow: auto;
   box-sizing: border-box;
+  user-select: none;
   header {
     height: 60px;
     line-height: 60px;
@@ -120,9 +154,15 @@ function showFileCatalog() {
     color: #333;
   }
   .fileName {
+    padding: 0 2px;
     font-size: 12px;
     line-height: 30px;
+    border-radius: 4px;
     cursor: pointer;
+  }
+  .activeFile {
+    color: #003eb3;
+    background-color: #e6f4ff;
   }
 }
 .contentCol {

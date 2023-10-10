@@ -19,7 +19,7 @@
       </div>
       <span>{{ serialNum }}、</span>
       <span> {{ item.name }}</span>
-      <span class="time"> Create at {{ item.time }}</span>
+      <span v-show="item.time" class="time"> Create at {{ item.time }}</span>
       <div v-if="!item.isFinish" class="icon">
         <EditOutlined @click="handleEdit" />
         <DeleteOutlined @click="handleDelete(false)" />
