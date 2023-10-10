@@ -75,9 +75,11 @@ function handleAdd() {
     isEdit: true
   })
   activeRow.value = 0
+  handleExport()
 }
 function handleEmpty() {
   list.value.length = 0
+  handleExport()
 }
 
 function handleDelete(index) {
@@ -104,6 +106,7 @@ function handleDeleteChange(item, raw) {
       content: createVNode('div', { style: 'color:red;' }, item.name),
       onOk() {
         handleDelete(raw.index)
+        handleExport()
       },
       onCancel() {
         console.log('Cancel')
@@ -113,10 +116,15 @@ function handleDeleteChange(item, raw) {
 }
 function handleFinishChange(item, raw) {
   item.isFinish = raw.isFinish
+  handleExport()
 }
 function handleEditChange(item, raw) {
+  if (item.isFinish) return
   const nameIndex = list.value.findIndex((item) => !item.name)
-  if (nameIndex !== -1) return
+  if (nameIndex !== -1) {
+    message.warning('请输入待办事项')
+    return
+  }
 
   const editIndex = list.value.findIndex((item) => item.isEdit)
   if (editIndex !== -1) list.value[editIndex].isEdit = false
@@ -181,6 +189,7 @@ function shortcutEvent() {
 
       if (e.key == 'Delete') {
         handleDelete(activeRow.value - 1)
+        handleExport()
       }
 
       if (e.key == 'Enter') {

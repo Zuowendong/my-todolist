@@ -29,7 +29,7 @@ function createWindow() {
     const { fileUrl, time } = data
     const filePath = join(fileUrl, `${time}.txt`)
     writeFile(data)
-    shell.openPath(filePath)
+    // shell.openPath(filePath)
   })
 
   mainWindow.on('ready-to-show', () => {
