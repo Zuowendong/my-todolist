@@ -22,6 +22,7 @@
           @enterChange="(raw) => handleEnterChange(item, raw)"
           @deleteChange="(raw) => handleDeleteChange(item, raw)"
           @finishChange="(raw) => handleFinishChange(item, raw)"
+          @editChange="(raw) => handleEditChange(item, raw)"
         ></TodoItem>
       </div>
       <div class="addBox-list">
@@ -112,6 +113,15 @@ function handleDeleteChange(item, raw) {
 }
 function handleFinishChange(item, raw) {
   item.isFinish = raw.isFinish
+}
+function handleEditChange(item, raw) {
+  const nameIndex = list.value.findIndex((item) => !item.name)
+  if (nameIndex !== -1) return
+
+  const editIndex = list.value.findIndex((item) => item.isEdit)
+  if (editIndex !== -1) list.value[editIndex].isEdit = false
+
+  item.isEdit = raw.isEdit
 }
 
 let activeRow = ref(0)
@@ -210,6 +220,9 @@ onMounted(() => shortcutEvent())
     position: absolute;
     top: -40px;
     right: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, 20px);
+    column-gap: 4px;
   }
   .item-row {
     line-height: 34px;

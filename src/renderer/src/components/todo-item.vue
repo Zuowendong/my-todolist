@@ -9,7 +9,7 @@
         @keydown.enter="handleInput"
       />
       <CheckCircleOutlined class="icon" @click="handleInput" />
-      <CloseCircleOutlined class="icon" @click="handleDelete(true)" />
+      <DeleteOutlined class="icon" @click="handleDelete(true)" />
     </div>
 
     <div v-else class="show-item">
@@ -21,7 +21,8 @@
       <span> {{ item.name }}</span>
       <span class="time"> Create at {{ item.time }}</span>
       <div class="icon">
-        <CloseCircleOutlined @click="handleDelete(false)" />
+        <EditOutlined @click="handleEdit" />
+        <DeleteOutlined @click="handleDelete(false)" />
       </div>
     </div>
   </div>
@@ -32,9 +33,10 @@ import { onMounted, ref, toRefs } from 'vue'
 import { Input } from 'ant-design-vue'
 import {
   CheckCircleOutlined,
-  CloseCircleOutlined,
   MehOutlined,
-  SmileOutlined
+  SmileOutlined,
+  EditOutlined,
+  DeleteOutlined
 } from '@ant-design/icons-vue'
 
 const props = defineProps({
@@ -49,7 +51,7 @@ const props = defineProps({
 })
 
 const { item, serialNum } = toRefs(props)
-const emits = defineEmits(['enterChange', 'deleteChange', 'finishChange'])
+const emits = defineEmits(['enterChange', 'deleteChange', 'finishChange', 'editChange'])
 
 function handleInput() {
   emits('enterChange', { isEdit: false })
@@ -63,6 +65,9 @@ function handleDelete(isEdit) {
 function handleFinished(isFinish) {
   emits('finishChange', { isFinish })
 }
+function handleEdit() {
+  emits('editChange', { isEdit: true })
+}
 
 const inputRef = ref()
 onMounted(() => {
@@ -74,13 +79,14 @@ onMounted(() => {
 .edit-item {
   display: flex;
   align-items: center;
+  padding-right: 6px;
   .icon {
     margin-left: 4px;
   }
 }
 .show-item {
   display: grid;
-  grid-template-columns: 30px 30px auto 130px 30px;
+  grid-template-columns: 30px 30px auto 130px 44px;
   grid-auto-rows: minmax(32px, auto);
   align-items: center;
   .time {
@@ -92,8 +98,10 @@ onMounted(() => {
     justify-content: flex-start;
   }
   .icon {
-    display: flex;
     justify-content: flex-end;
+    display: grid;
+    grid-template-columns: repeat(2, 20px);
+    justify-items: flex-end;
   }
 }
 </style>
