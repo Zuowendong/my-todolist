@@ -24,26 +24,42 @@
           @finishChange="(raw) => handleFinishChange(item, raw)"
         ></TodoItem>
       </div>
-      <div v-if="isAdd" class="addBox-list">
-        <PlusCircleOutlined @click="handleAdd" />
+      <div class="addBox-list">
+        <PlusCircleOutlined v-if="isAdd" @click="handleAdd" />
+        <UploadOutlined v-if="isExport" @click="handleExport" />
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, createVNode } from 'vue'
+import { computed, onMounted, ref, createVNode, toRefs } from 'vue'
 import { Button, Modal, message } from 'ant-design-vue'
-import { ExclamationCircleOutlined, PlusCircleOutlined } from '@ant-design/icons-vue'
+import {
+  ExclamationCircleOutlined,
+  PlusCircleOutlined,
+  UploadOutlined
+} from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
 import TodoItem from './todo-item.vue'
 import ShortcutKey from './shortcut-key.vue'
+
+const props = defineProps({
+  fileUrl: {
+    type: String,
+    default: ''
+  }
+})
+const { fileUrl } = toRefs(props)
 
 const list = ref([])
 
 const isEmpty = computed(() => !list.value.length)
 const isAdd = computed(() => {
   return !list.value[list.value.length - 1].isEdit
+})
+const isExport = computed(() => {
+  return !!list.value.filter((item) => !item.isEdit).length
 })
 
 function handleAdd() {
@@ -95,7 +111,6 @@ function handleDeleteChange(item, raw) {
   }
 }
 function handleFinishChange(item, raw) {
-  console.log('🔥🔥🔥🔥🔥🔥', item, raw)
   item.isFinish = raw.isFinish
 }
 
@@ -114,7 +129,22 @@ function removeLastAdd() {
   }
 }
 
-onMounted(() => {
+function handleExport() {
+  const content = list.value
+    .filter((item) => !item.isEdit)
+    .map((item, index) => {
+      return `${index + 1}.${item.name} (${item.isFinish ? '已完成' : '未完成'})\n`
+    })
+
+  const today = dayjs().format('YYYY-MM-DD')
+  window.electronFile.exportFile({
+    fileUrl: fileUrl.value,
+    time: today,
+    content: `${today}待办事项\n${content.join('')}`
+  })
+}
+
+function shortcutEvent() {
   document.onkeydown = (e) => {
     if (e.key == 'Escape') {
       activeRow.value = 0
@@ -149,7 +179,9 @@ onMounted(() => {
       }
     }
   }
-})
+}
+
+onMounted(() => shortcutEvent())
 </script>
 
 <style lang="less" scoped>

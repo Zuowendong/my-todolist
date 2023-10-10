@@ -1,7 +1,9 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'node:path'
+import fs from 'node:fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { writeFile } from './file'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -22,6 +24,13 @@ function createWindow() {
     shell.openPath(path)
   })
   ipcMain.handle('dialog:changeFile', handleFileOpen)
+
+  ipcMain.on('exportFile', (_, data) => {
+    const { fileUrl, time } = data
+    const filePath = join(fileUrl, `${time}.txt`)
+    writeFile(data)
+    shell.openPath(filePath)
+  })
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

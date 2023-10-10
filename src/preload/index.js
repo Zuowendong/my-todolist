@@ -13,7 +13,8 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('api', api)
 
     contextBridge.exposeInMainWorld('electronFile', {
-      setFileUrl: (path) => ipcRenderer.send('dialog:openFile', path)
+      setFileUrl: (path) => ipcRenderer.send('dialog:openFile', path),
+      exportFile: (data) => ipcRenderer.send('exportFile', data)
     })
   } catch (error) {
     console.error(error)

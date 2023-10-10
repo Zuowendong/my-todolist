@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Modal, Tag, Tabs, TabPane, Button } from 'ant-design-vue'
 import { QuestionCircleOutlined } from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
@@ -16,18 +16,20 @@ function showModal() {
 }
 
 let fileUrl = ref('')
-function changeFileStorage() {
-  console.log('🔥🔥🔥🔥🔥🔥', window.electron)
 
+onMounted(() => {
+  fileUrl.value = window.localStorage.getItem('fileUrl') || ''
+})
+
+function changeFileStorage() {
   const { ipcRenderer } = window.electron
   ipcRenderer.invoke('dialog:changeFile').then((res) => {
-    console.log('file', res)
     fileUrl.value = res
+    window.localStorage.setItem('fileUrl', fileUrl.value)
   })
 }
 
 function openFile() {
-  console.log('🔥🔥🔥🔥🔥🔥', window.electronFile)
   if (!fileUrl.value) return
   window.electronFile.setFileUrl(fileUrl.value)
 }
@@ -39,17 +41,14 @@ function openFile() {
       <Tag :bordered="false">{{ today }}</Tag>
       待办事项
     </header>
-    <TodoList class="listBox"></TodoList>
+    <TodoList class="listBox" :fileUrl="fileUrl"></TodoList>
 
     <div class="tipBox" title="快捷键提示" @click="showModal">
       <QuestionCircleOutlined style="font-size: 20px" />
     </div>
     <Modal v-model:open="open" title="帮助" :footer="null">
       <Tabs v-model:activeKey="activeKey">
-        <TabPane key="1" tab="快捷键">
-          <ShortcutKey></ShortcutKey>
-        </TabPane>
-        <TabPane key="2" tab="文件管理">
+        <TabPane key="1" tab="文件管理">
           <div class="file-manage">
             <div class="row-url">{{ fileUrl }}</div>
             <div class="row-tip">待办日志文件的默认保存位置</div>
@@ -58,6 +57,9 @@ function openFile() {
               <Button @click="openFile">打开文件夹</Button>
             </div>
           </div>
+        </TabPane>
+        <TabPane key="2" tab="快捷键">
+          <ShortcutKey></ShortcutKey>
         </TabPane>
       </Tabs>
     </Modal>
