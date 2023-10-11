@@ -67,7 +67,7 @@ function showFileCatalog() {
   isFileCatalog.value = !isFileCatalog.value
 }
 
-let fileTime = ref('')
+let fileTime = ref(dayjs().format('YYYY-MM-DD'))
 function switchFile(item) {
   activeFileId.value = item.id
   fileTime.value = item.name.split('.')[0]
@@ -103,7 +103,7 @@ async function handleAdd() {
 
 <template>
   <div class="main">
-    <Row style="height: 100%">
+    <Row class="main-row">
       <Col flex="30px" class="centerCol">
         <SnippetsOutlined
           :class="['icon', isFileCatalog ? 'activeIcon' : '']"
@@ -166,15 +166,18 @@ async function handleAdd() {
   overflow: auto;
   box-sizing: border-box;
   user-select: none;
-  header {
-    height: 60px;
-    line-height: 60px;
-  }
-  .listBox {
-    height: calc(100% - 60px);
-  }
 }
-
+.main-row {
+  height: 100%;
+  flex-wrap: nowrap;
+}
+header {
+  height: 60px;
+  line-height: 60px;
+}
+.listBox {
+  height: calc(100% - 60px);
+}
 .centerCol {
   display: flex;
   flex-direction: column;
@@ -207,6 +210,7 @@ async function handleAdd() {
 .contentCol {
   box-sizing: border-box;
   padding-left: 10px;
+  flex-shrink: 0;
 }
 .file-manage {
   height: 192px;

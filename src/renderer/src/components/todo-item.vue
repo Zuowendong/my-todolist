@@ -18,7 +18,7 @@
         <MehOutlined v-else @click="handleFinished(true)" />
       </div>
       <span>{{ serialNum }}、</span>
-      <span @click="sendNotification"> {{ item.name }}</span>
+      <span style="line-height: 18px" @click="sendNotification"> {{ item.name }}</span>
       <span v-show="item.time" class="time"> Create at {{ item.time }}</span>
       <div v-if="!item.isFinish" class="icon">
         <EditOutlined @click="handleEdit" />
@@ -27,14 +27,26 @@
       </div>
     </div>
 
-    <Modal v-model:open="open" title="设置">
+    <Modal v-model:open="open" title="设置" :maskClosable="false">
       <template #footer>
         <Button key="back" @click="handleCancel">取消</Button>
         <Button key="submit" type="primary" @click="handleOk">确定</Button>
       </template>
-      <Form ref="formRef" :model="formData" :label-col="labelCol" :wrapper-col="wrapperCol">
-        <FormItem label="通知时间">
-          <TimePicker v-model:value="formData.time" format="HH:mm" value-format="HH:mm" />
+      <Form
+        ref="formRef"
+        :model="formState"
+        :rules="rules"
+        :label-col="labelCol"
+        :wrapper-col="wrapperCol"
+      >
+        <FormItem label="通知时间" name="time">
+          <TimePicker
+            v-model:value="formState.time"
+            format="HH:mm"
+            value-format="HH:mm"
+            :disabledHours="disabledHours"
+            :disabledMinutes="disabledMinutes"
+          />
         </FormItem>
       </Form>
     </Modal>
@@ -42,7 +54,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, toRefs } from 'vue'
+import { computed, onMounted, reactive, ref, toRefs, toRaw } from 'vue'
 import { Input, Modal, Button, Form, FormItem, TimePicker } from 'ant-design-vue'
 import {
   CheckCircleOutlined,
@@ -93,7 +105,9 @@ onMounted(() => {
   inputRef.value?.focus()
 })
 
-const isSettingBtn = computed(() => dayjs().format('YYYY-MM-DD') == fileTime.value)
+const isSettingBtn = computed(() => {
+  return dayjs().format('YYYY-MM-DD') == fileTime.value
+})
 let open = ref(false)
 function setNotification() {
   open.value = true
@@ -101,13 +115,48 @@ function setNotification() {
 function handleCancel() {
   open.value = false
 }
+const formRef = ref()
+const formState = reactive({ time: '' })
 function handleOk() {
-  handleCancel()
+  formRef.value &&
+    formRef.value
+      .validate()
+      .then(() => {
+        console.log('values', formState, toRaw(formState))
+        handleCancel()
+      })
+      .catch((error) => {
+        console.log('error', error)
+      })
 }
 
+function disabledHours() {
+  // 获取当前时间
+  const now = new Date()
+  const currentHour = now.getHours()
+
+  // 禁用当前时间之前的小时
+  return Array.from({ length: currentHour }, (_, index) => index)
+}
+function disabledMinutes(selectedHour) {
+  // 获取当前时间
+  const now = new Date()
+  const currentHour = now.getHours()
+  const currentMinute = now.getMinutes()
+
+  // 禁用当前时间之前的分钟
+  if (selectedHour === currentHour) {
+    return Array.from({ length: currentMinute }, (_, index) => index)
+  }
+
+  return []
+}
 const labelCol = { style: { width: '100px' } }
 const wrapperCol = { span: 14 }
-const formData = ref({ time: '' })
+const rules = {
+  time: [{ required: true, message: '请选择通知时间', trigger: 'change' }]
+}
+
 function sendNotification() {
   const myNotification = new Notification('标题', {
     body: '通知正文内容'
