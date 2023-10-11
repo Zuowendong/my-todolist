@@ -1,7 +1,7 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Modal, Tag, Tabs, TabPane, Button, Row, Col } from 'ant-design-vue'
-import { QuestionCircleOutlined, SnippetsOutlined } from '@ant-design/icons-vue'
+import { QuestionCircleOutlined, SnippetsOutlined, PlusCircleOutlined } from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
 import TodoList from './components/todo-list.vue'
 import ShortcutKey from './components/shortcut-key.vue'
@@ -21,6 +21,20 @@ let fileContent = ref([])
 onMounted(() => {
   fileUrl.value = window.localStorage.getItem('fileUrl') || ''
 
+  getFileNames()
+  getFileContent()
+
+  window.electronFile.readFile(`${fileUrl.value}\\${dayjs().format('YYYY-MM-DD')}.txt`)
+})
+
+function getFileContent() {
+  window.electron.ipcRenderer.on('fileContent', (_, data) => {
+    fileContent.value = data.split('\n')
+    fileContent.value.splice(0, 1)
+  })
+}
+
+function getFileNames() {
   window.electronFile.readFileNames(fileUrl.value)
   window.electron.ipcRenderer.on('fileNames', (_, names) => {
     fileNames.value = names.map((item, index) => {
@@ -30,12 +44,7 @@ onMounted(() => {
       }
     })
   })
-
-  window.electron.ipcRenderer.on('fileContent', (_, data) => {
-    fileContent.value = data.split('\n')
-    fileContent.value.splice(0, 1)
-  })
-})
+}
 
 function changeFileStorage() {
   const { ipcRenderer } = window.electron
@@ -65,6 +74,28 @@ function switchFile(item) {
 const today = computed(() => {
   return fileTime.value || dayjs().format('YYYY-MM-DD')
 })
+
+let isAddTodayBtn = ref(false)
+watch(today, (val) => {
+  if (val != dayjs().format('YYYY-MM-DD')) isAddTodayBtn.value = true
+  hiddenTodayBtn()
+})
+function hiddenTodayBtn() {
+  const index = fileNames.value.findIndex((item) =>
+    item.name.includes(dayjs().format('YYYY-MM-DD'))
+  )
+  if (index != -1) isAddTodayBtn.value = false
+}
+
+async function handleAdd() {
+  hiddenTodayBtn()
+  await window.electronFile.createFile({
+    path: fileUrl.value,
+    time: dayjs().format('YYYY-MM-DD')
+  })
+
+  getFileNames()
+}
 </script>
 
 <template>
@@ -76,6 +107,7 @@ const today = computed(() => {
           @click="showFileCatalog"
         />
         <QuestionCircleOutlined :class="['icon', open ? 'activeIcon' : '']" @click="showModal" />
+        <PlusCircleOutlined v-if="isAddTodayBtn" class="icon activeIcon" @click="handleAdd" />
       </Col>
       <Col v-if="isFileCatalog" flex="100px" class="centerCol">
         <div
@@ -88,7 +120,7 @@ const today = computed(() => {
         </div>
       </Col>
       <Col flex="auto" class="contentCol">
-        <header @click="handle">
+        <header>
           <Tag :bordered="false">{{ today }}</Tag>
           待办事项
         </header>
@@ -97,6 +129,7 @@ const today = computed(() => {
           :fileUrl="fileUrl"
           :originList="fileContent"
           :fileTime="fileTime"
+          @exportFile="getFileNames"
         ></TodoList>
       </Col>
     </Row>
@@ -152,6 +185,9 @@ const today = computed(() => {
   }
   .activeIcon {
     color: #333;
+  }
+  .addBtn {
+    margin-bottom: 10px;
   }
   .fileName {
     padding: 0 2px;

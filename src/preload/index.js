@@ -16,7 +16,8 @@ if (process.contextIsolated) {
       setFileUrl: (path) => ipcRenderer.send('dialog:openFile', path),
       exportFile: (data) => ipcRenderer.send('exportFile', data),
       readFileNames: (data) => ipcRenderer.send('readFileNames', data),
-      readFile: (path) => ipcRenderer.send('readFile', path)
+      readFile: (path) => ipcRenderer.send('readFile', path),
+      createFile: (data) => ipcRenderer.send('createFile', data)
     })
   } catch (error) {
     console.error(error)

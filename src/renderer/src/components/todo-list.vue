@@ -60,6 +60,7 @@ const props = defineProps({
   }
 })
 const { fileUrl, fileTime } = toRefs(props)
+const emits = defineEmits(['exportFile'])
 
 let list = ref([])
 watch(
@@ -81,6 +82,8 @@ watch(
             isFinish
           }
         })
+    } else {
+      list.value = []
     }
   },
   { immediate: true }
@@ -108,6 +111,7 @@ function handleAdd() {
   activeRow.value = 0
   handleExport()
 }
+
 function handleEmpty() {
   list.value.length = 0
   handleExport()
@@ -186,11 +190,14 @@ function handleExport() {
       return `${item.isFinish ? '√' : '×'} ${index + 1}.${item.name} ->${time}\n`
     })
 
+  const time = fileTime.value || dayjs().format('YYYY-MM-DD')
   window.electronFile.exportFile({
-    fileUrl: fileUrl.value,
-    time: fileTime.value,
-    content: `${fileTime.value}待办事项\n${content.join('')}`
+    path: fileUrl.value,
+    time,
+    content: `${time}待办事项\n${content.join('')}`
   })
+
+  emits('exportFile')
 }
 
 function shortcutEvent() {

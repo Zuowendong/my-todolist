@@ -25,22 +25,21 @@ function createWindow() {
   ipcMain.handle('dialog:changeFile', handleFileOpen)
 
   ipcMain.on('exportFile', (_, data) => {
-    // const { fileUrl, time } = data
-    // const filePath = join(fileUrl, `${time}.txt`)
     writeFile(data)
-    // shell.openPath(filePath)
   })
   ipcMain.on('readFileNames', (event, data) => {
     let res = getAllFileName(data)
     event.sender.send('fileNames', res)
   })
   ipcMain.on('readFile', (event, path) => {
-    console.log('🔥🔥🔥🔥🔥🔥', path)
-
     readFile(path).then((res) => {
-      console.log('🔥🔥🔥🔥🔥🔥', res)
-
       event.sender.send('fileContent', res)
+    })
+  })
+  ipcMain.on('createFile', (_, data) => {
+    writeFile({
+      ...data,
+      content: `${data.time}待办事项`
     })
   })
 
@@ -68,8 +67,6 @@ app.whenReady().then(() => {
   })
 
   createWindow()
-
-  console.log('init')
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
