@@ -235,9 +235,9 @@ onMounted(() => shortcutEvent())
 <style lang="less" scoped>
 .list {
   width: 100%;
-  height: 100%;
   position: relative;
   user-select: none;
+  overflow-y: auto;
   .shortcutBox {
     position: absolute;
     top: 0;

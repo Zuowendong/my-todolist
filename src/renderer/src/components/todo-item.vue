@@ -134,7 +134,6 @@ function disabledHours() {
   // 获取当前时间
   const now = new Date()
   const currentHour = now.getHours()
-
   // 禁用当前时间之前的小时
   return Array.from({ length: currentHour }, (_, index) => index)
 }
@@ -143,12 +142,10 @@ function disabledMinutes(selectedHour) {
   const now = new Date()
   const currentHour = now.getHours()
   const currentMinute = now.getMinutes()
-
   // 禁用当前时间之前的分钟
   if (selectedHour === currentHour) {
     return Array.from({ length: currentMinute }, (_, index) => index)
   }
-
   return []
 }
 const labelCol = { style: { width: '100px' } }

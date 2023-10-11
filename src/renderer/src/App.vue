@@ -163,7 +163,7 @@ async function handleAdd() {
 .main {
   height: 100%;
   position: relative;
-  overflow: auto;
+  overflow: hidden;
   box-sizing: border-box;
   user-select: none;
 }
@@ -184,6 +184,7 @@ header {
   align-items: center;
   padding-top: 20px;
   box-shadow: 1px 0px 2px 0px #ccc;
+  overflow-y: auto;
   .icon {
     font-size: 22px;
     margin-bottom: 20px;
