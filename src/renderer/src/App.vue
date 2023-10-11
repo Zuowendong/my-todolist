@@ -40,9 +40,12 @@ function getFileNames() {
     fileNames.value = names.map((item, index) => {
       return {
         id: index + 1,
-        name: item
+        name: item,
+        code: dayjs(item.split('.')[0]).valueOf()
       }
     })
+    fileNames.value.sort((a, b) => b.code - a.code)
+    activeFileId.value = fileNames.value[0].id
   })
 }
 
