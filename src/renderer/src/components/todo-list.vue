@@ -19,6 +19,7 @@
         <TodoItem
           :item="item"
           :serialNum="index + 1"
+          :fileTime="fileTime"
           @enterChange="(raw) => handleEnterChange(item, raw)"
           @deleteChange="(raw) => handleDeleteChange(item, raw)"
           @finishChange="(raw) => handleFinishChange(item, raw)"

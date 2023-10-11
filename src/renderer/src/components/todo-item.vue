@@ -18,26 +18,41 @@
         <MehOutlined v-else @click="handleFinished(true)" />
       </div>
       <span>{{ serialNum }}、</span>
-      <span> {{ item.name }}</span>
+      <span @click="sendNotification"> {{ item.name }}</span>
       <span v-show="item.time" class="time"> Create at {{ item.time }}</span>
       <div v-if="!item.isFinish" class="icon">
         <EditOutlined @click="handleEdit" />
+        <SettingOutlined v-if="isSettingBtn" @click="setNotification" />
         <DeleteOutlined @click="handleDelete(false)" />
       </div>
     </div>
+
+    <Modal v-model:open="open" title="设置">
+      <template #footer>
+        <Button key="back" @click="handleCancel">取消</Button>
+        <Button key="submit" type="primary" @click="handleOk">确定</Button>
+      </template>
+      <Form ref="formRef" :model="formData" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <FormItem label="通知时间">
+          <TimePicker v-model:value="formData.time" format="HH:mm" value-format="HH:mm" />
+        </FormItem>
+      </Form>
+    </Modal>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, toRefs } from 'vue'
-import { Input } from 'ant-design-vue'
+import { computed, onMounted, ref, toRefs } from 'vue'
+import { Input, Modal, Button, Form, FormItem, TimePicker } from 'ant-design-vue'
 import {
   CheckCircleOutlined,
   MehOutlined,
   SmileOutlined,
   EditOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  SettingOutlined
 } from '@ant-design/icons-vue'
+import dayjs from 'dayjs'
 
 const props = defineProps({
   item: {
@@ -47,10 +62,14 @@ const props = defineProps({
   serialNum: {
     type: Number,
     default: 0
+  },
+  fileTime: {
+    type: String,
+    default: ''
   }
 })
 
-const { item, serialNum } = toRefs(props)
+const { item, serialNum, fileTime } = toRefs(props)
 const emits = defineEmits(['enterChange', 'deleteChange', 'finishChange', 'editChange'])
 
 function handleInput() {
@@ -73,6 +92,30 @@ const inputRef = ref()
 onMounted(() => {
   inputRef.value?.focus()
 })
+
+const isSettingBtn = computed(() => dayjs().format('YYYY-MM-DD') == fileTime.value)
+let open = ref(false)
+function setNotification() {
+  open.value = true
+}
+function handleCancel() {
+  open.value = false
+}
+function handleOk() {
+  handleCancel()
+}
+
+const labelCol = { style: { width: '100px' } }
+const wrapperCol = { span: 14 }
+const formData = ref({ time: '' })
+function sendNotification() {
+  const myNotification = new Notification('标题', {
+    body: '通知正文内容'
+  })
+  myNotification.onclick = () => {
+    console.log('通知被点击')
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -86,7 +129,7 @@ onMounted(() => {
 }
 .show-item {
   display: grid;
-  grid-template-columns: 30px 30px auto 130px 44px;
+  grid-template-columns: 30px 30px auto 130px 66px;
   grid-auto-rows: minmax(32px, auto);
   align-items: center;
   .time {
@@ -100,7 +143,7 @@ onMounted(() => {
   .icon {
     justify-content: flex-end;
     display: grid;
-    grid-template-columns: repeat(2, 20px);
+    grid-template-columns: repeat(3, 20px);
     justify-items: flex-end;
   }
 }
