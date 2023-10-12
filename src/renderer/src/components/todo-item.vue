@@ -18,11 +18,11 @@
         <MehOutlined v-else @click="handleFinished(true)" />
       </div>
       <span>{{ serialNum }}、</span>
-      <span style="line-height: 18px" @click="sendNotification"> {{ item.name }}</span>
+      <span style="line-height: 18px"> {{ item.name }}</span>
       <span v-show="item.time" class="time"> Create at {{ item.time }}</span>
       <div v-if="!item.isFinish" class="icon">
         <EditOutlined @click="handleEdit" />
-        <SettingOutlined v-if="isSettingBtn" @click="setNotification" />
+        <SettingOutlined v-if="isSettingBtn" @click="setNotification(item)" />
         <DeleteOutlined @click="handleDelete(false)" />
       </div>
     </div>
@@ -47,6 +47,15 @@
             :disabledHours="disabledHours"
             :disabledMinutes="disabledMinutes"
           />
+          <div v-if="countDown >= 0" style="margin-top: 10px">
+            将于
+            <Tag :bordered="false" color="processing">{{ countDown == 0 ? 1 : countDown }}</Tag>
+            分钟后进行系统提醒:
+            <Tag :bordered="false" color="gold">{{ item.name }}</Tag>
+          </div>
+          <Tag v-else style="margin-top: 10px" :bordered="false" color="red">
+            通知时间已过期，如需提醒可再次设置
+          </Tag>
         </FormItem>
       </Form>
     </Modal>
@@ -55,7 +64,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, toRefs, toRaw } from 'vue'
-import { Input, Modal, Button, Form, FormItem, TimePicker } from 'ant-design-vue'
+import { Input, Modal, Button, Form, FormItem, TimePicker, Tag } from 'ant-design-vue'
 import {
   CheckCircleOutlined,
   MehOutlined,
@@ -82,7 +91,13 @@ const props = defineProps({
 })
 
 const { item, serialNum, fileTime } = toRefs(props)
-const emits = defineEmits(['enterChange', 'deleteChange', 'finishChange', 'editChange'])
+const emits = defineEmits([
+  'enterChange',
+  'deleteChange',
+  'finishChange',
+  'editChange',
+  'notifyChange'
+])
 
 function handleInput() {
   emits('enterChange', { isEdit: false })
@@ -108,21 +123,48 @@ onMounted(() => {
 const isSettingBtn = computed(() => {
   return dayjs().format('YYYY-MM-DD') == fileTime.value
 })
-let open = ref(false)
-function setNotification() {
-  open.value = true
-}
-function handleCancel() {
-  open.value = false
-}
+
 const formRef = ref()
 const formState = reactive({ time: '' })
+
+let open = ref(false)
+let intervalId = ref()
+function setNotification(item) {
+  formState.time = item.notify || ''
+  open.value = true
+  updateCountdown(dayjs(`${fileTime.value} ${formState.time}`))
+  intervalId.value = setInterval(
+    () => updateCountdown(dayjs(`${fileTime.value} ${formState.time}`)),
+    60000
+  )
+}
+
+let countDown = ref('')
+function updateCountdown(targetTime) {
+  const currentTime = dayjs()
+  const duration = targetTime.diff(currentTime)
+  const hours = Math.floor(duration / (1000 * 60 * 60))
+  const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60))
+  console.log(`Countdown: ${hours} hours ${minutes} minutes`)
+  countDown.value = hours * 60 + minutes
+  if (currentTime.isAfter(targetTime)) {
+    clearInterval(intervalId.value)
+  }
+}
+
+function handleCancel() {
+  open.value = false
+  intervalId.value && clearInterval(intervalId.value)
+}
+
 function handleOk() {
   formRef.value &&
     formRef.value
       .validate()
       .then(() => {
-        console.log('values', formState, toRaw(formState))
+        emits('notifyChange', {
+          notify: toRaw(formState).time
+        })
         handleCancel()
       })
       .catch((error) => {
@@ -152,15 +194,6 @@ const labelCol = { style: { width: '100px' } }
 const wrapperCol = { span: 14 }
 const rules = {
   time: [{ required: true, message: '请选择通知时间', trigger: 'change' }]
-}
-
-function sendNotification() {
-  const myNotification = new Notification('标题', {
-    body: '通知正文内容'
-  })
-  myNotification.onclick = () => {
-    console.log('通知被点击')
-  }
 }
 </script>
 

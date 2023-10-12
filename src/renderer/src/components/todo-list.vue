@@ -24,6 +24,7 @@
           @deleteChange="(raw) => handleDeleteChange(item, raw)"
           @finishChange="(raw) => handleFinishChange(item, raw)"
           @editChange="(raw) => handleEditChange(item, raw)"
+          @notifyChange="(raw) => handleNotifyChange(item, raw)"
         ></TodoItem>
       </div>
     </template>
@@ -68,27 +69,42 @@ watch(
   () => props.originList,
   (_list) => {
     if (_list && _list.length) {
-      list.value = _list
-        .filter((item) => item)
-        .map((item) => {
-          const isFinish = item.split('')[0] == '√'
-          const name = item.substring(1).split('->')[0].trim().substring(2)
-          const time = item.split('->')[1]
-
-          return {
-            id: Math.random() * 100,
-            name,
-            time: time ? `${fileTime.value.substring(5)} ${time}` : '',
-            isEdit: false,
-            isFinish
-          }
-        })
+      list.value = formatOriginList(_list)
     } else {
       list.value = []
     }
   },
   { immediate: true }
 )
+
+function formatOriginList(list) {
+  return list
+    .filter((item) => item)
+    .map((item) => {
+      const isFinish = item.split('')[0] == '√'
+      const name = item.substring(1).split('->')[0].trim().substring(2)
+      const timeArrStr = item.split('->')[1]
+
+      let time = null
+      let notify = null
+      if (timeArrStr.includes(',')) {
+        time = timeArrStr.split(',')[0]
+        notify = timeArrStr.split(',')[1]
+      } else {
+        time = timeArrStr
+        notify = null
+      }
+
+      return {
+        id: Math.random() * 100,
+        name,
+        time: time ? `${fileTime.value.substring(5)} ${time}` : '',
+        isEdit: false,
+        isFinish,
+        notify
+      }
+    })
+}
 
 const isEmpty = computed(() => !list.value.length)
 const isAdd = computed(() => {
@@ -167,6 +183,31 @@ function handleEditChange(item, raw) {
 
   item.isEdit = raw.isEdit
 }
+function handleNotifyChange(item, raw) {
+  item.notify = raw.notify
+  handleExport()
+  setTimer(item)
+}
+
+function setTimer(item) {
+  if (item.timerId) {
+    clearTimeout(item.timerId)
+  }
+  // set notify time
+  const notityTime = dayjs()
+    .set('hour', item.notify.split(':')[0])
+    .set('minute', item.notify.split(':')[1])
+
+  let timeNum = notityTime.diff(dayjs())
+  if (timeNum > 0) {
+    item.timerId = setTimeout(() => {
+      new Notification('今日待办', {
+        body: item.name
+      })
+      clearTimeout(item.timerId)
+    }, timeNum)
+  }
+}
 
 let activeRow = ref(0)
 function activedNumKey(e) {
@@ -187,8 +228,8 @@ function handleExport() {
   const content = list.value
     .filter((item) => !item.isEdit)
     .map((item, index) => {
-      const time = item.time.split(' ')[1]
-      return `${item.isFinish ? '√' : '×'} ${index + 1}.${item.name} ->${time}\n`
+      const timeArr = [item.time.split(' ')[1], item.notify].filter((item) => item)
+      return `${item.isFinish ? '√' : '×'} ${index + 1}.${item.name} ->${timeArr}\n`
     })
 
   const time = fileTime.value || dayjs().format('YYYY-MM-DD')
@@ -224,6 +265,7 @@ function shortcutEvent() {
       if (e.key == 'Enter') {
         const target = list.value.find((_, index) => index + 1 == activeRow.value)
         target.isFinish = true
+        handleExport()
       }
     }
   }
