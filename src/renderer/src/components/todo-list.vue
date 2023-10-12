@@ -26,11 +26,11 @@
           @editChange="(raw) => handleEditChange(item, raw)"
         ></TodoItem>
       </div>
-      <div class="addBox-list">
-        <PlusCircleOutlined v-if="isAdd" @click="handleAdd" />
-        <UploadOutlined v-if="isExport" @click="handleExport" />
-      </div>
     </template>
+    <div class="addBox-list">
+      <PlusCircleOutlined v-if="isAdd" @click="handleAdd" />
+      <UploadOutlined v-if="isExport" @click="handleExport" />
+    </div>
   </div>
 </template>
 
@@ -92,7 +92,7 @@ watch(
 
 const isEmpty = computed(() => !list.value.length)
 const isAdd = computed(() => {
-  return !list.value[list.value.length - 1].isEdit
+  return !list.value[list.value.length - 1]?.isEdit
 })
 const isExport = computed(() => {
   return !!list.value.filter((item) => !item.isEdit).length
@@ -254,14 +254,7 @@ onMounted(() => shortcutEvent())
     align-items: center;
     justify-content: center;
   }
-  .addBox-list {
-    position: absolute;
-    top: -40px;
-    right: 6px;
-    display: grid;
-    grid-template-columns: repeat(2, 20px);
-    column-gap: 4px;
-  }
+
   .item-row {
     line-height: 34px;
     border-radius: 4px;
@@ -275,6 +268,15 @@ onMounted(() => shortcutEvent())
   .finish-row {
     color: #999;
     text-decoration: line-through;
+  }
+
+  .addBox-list {
+    position: fixed;
+    top: 25px;
+    right: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, 20px);
+    column-gap: 4px;
   }
 }
 </style>
