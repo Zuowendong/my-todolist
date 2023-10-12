@@ -46,16 +46,19 @@
             value-format="HH:mm"
             :disabledHours="disabledHours"
             :disabledMinutes="disabledMinutes"
+            placeholder="请选择通知时间"
           />
-          <div v-if="countDown >= 0" style="margin-top: 10px">
-            将于
-            <Tag :bordered="false" color="processing">{{ countDown == 0 ? 1 : countDown }}</Tag>
-            分钟后进行系统提醒:
-            <Tag :bordered="false" color="gold">{{ item.name }}</Tag>
-          </div>
-          <Tag v-else style="margin-top: 10px" :bordered="false" color="red">
-            通知时间已过期，如需提醒可再次设置
-          </Tag>
+          <template v-if="formState.time">
+            <div v-if="countDown >= 0" style="margin-top: 10px">
+              将于
+              <Tag :bordered="false" color="processing">{{ countDown == 0 ? 1 : countDown }}</Tag>
+              分钟后进行系统提醒:
+              <Tag :bordered="false" color="gold">{{ item.name }}</Tag>
+            </div>
+            <Tag v-else style="margin-top: 10px" :bordered="false" color="red">
+              通知时间已过期，如需提醒可再次设置
+            </Tag>
+          </template>
         </FormItem>
       </Form>
     </Modal>
