@@ -15,15 +15,13 @@ function showModal() {
 
 let fileUrl = ref('')
 let fileNames = ref([])
-let activeFileId = ref(0)
+let activeFileCode = ref(0)
 let fileContent = ref([])
 
 onMounted(() => {
   fileUrl.value = window.localStorage.getItem('fileUrl') || ''
-
   getFileNames()
   getFileContent()
-
   window.electronFile.readFile(`${fileUrl.value}\\${dayjs().format('YYYY-MM-DD')}.txt`)
 })
 
@@ -36,16 +34,21 @@ function getFileContent() {
 
 function getFileNames() {
   window.electronFile.readFileNames(fileUrl.value)
-  window.electron.ipcRenderer.on('fileNames', (_, names) => {
-    fileNames.value = names.map((item, index) => {
-      return {
-        id: index + 1,
-        name: item,
-        code: dayjs(item.split('.')[0]).valueOf()
-      }
-    })
+  window.electron.ipcRenderer.on('directoryChanges', (_, data) => {
+    const { event, path } = data
+    const name = path.split('\\')[path.split('\\').length - 1]
+    const code = dayjs(name.split('.')[0]).valueOf()
+    const index = fileNames.value.findIndex((item) => item.code === code)
+    if (event == 'add' && index === -1) {
+      fileNames.value.unshift({
+        name,
+        code
+      })
+    }
+    if (event == 'unlink' && index !== -1) {
+      fileNames.value.splice(index, 1)
+    }
     fileNames.value.sort((a, b) => b.code - a.code)
-    activeFileId.value = fileNames.value[0].id
   })
 }
 
@@ -69,7 +72,7 @@ function showFileCatalog() {
 
 let fileTime = ref(dayjs().format('YYYY-MM-DD'))
 function switchFile(item) {
-  activeFileId.value = item.id
+  activeFileCode.value = item.code
   fileTime.value = item.name.split('.')[0]
   window.electronFile.readFile(`${fileUrl.value}\\${item.name}`)
 }
@@ -115,8 +118,8 @@ async function handleAdd() {
       <Col v-if="isFileCatalog" flex="100px" class="centerCol">
         <div
           v-for="item in fileNames"
-          :key="item.id"
-          :class="['fileName', item.id === activeFileId ? 'activeFile' : '']"
+          :key="item.code"
+          :class="['fileName', item.code === activeFileCode ? 'activeFile' : '']"
           @click="switchFile(item)"
         >
           {{ item.name }}

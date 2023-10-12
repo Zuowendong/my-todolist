@@ -1,8 +1,9 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
-import { join } from 'node:path'
+import { join, normalize } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { writeFile, getAllFileName, readFile } from './file'
+import chokidar from 'chokidar'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -27,9 +28,14 @@ function createWindow() {
   ipcMain.on('exportFile', (_, data) => {
     writeFile(data)
   })
-  ipcMain.on('readFileNames', (event, data) => {
-    let res = getAllFileName(data)
-    event.sender.send('fileNames', res)
+  ipcMain.on('readFileNames', (fileEvent, path) => {
+    chokidar
+      .watch(path, {
+        persistent: true // 持续监听
+      })
+      .on('all', (event, path) => {
+        fileEvent.sender.send('directoryChanges', { event, path: normalize(path) })
+      })
   })
   ipcMain.on('readFile', (event, path) => {
     readFile(path).then((res) => {
@@ -88,6 +94,8 @@ async function handleFileOpen() {
     console.log('canceled')
     return
   } else {
+    console.log('🔥🔥🔥🔥🔥🔥', filePaths[0])
+
     return filePaths[0]
   }
 }
