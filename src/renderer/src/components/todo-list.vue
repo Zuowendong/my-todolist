@@ -201,7 +201,7 @@ function setTimer(item) {
   let timeNum = notityTime.diff(dayjs())
   if (timeNum > 0) {
     item.timerId = setTimeout(() => {
-      new Notification('今日待办', {
+      new Notification('待办(今日事今日毕)', {
         body: item.name
       })
       clearTimeout(item.timerId)

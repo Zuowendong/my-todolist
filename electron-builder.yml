@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: my-electron-todolist
+productName: 今日清单
 directories:
   buildResources: build
 files:
@@ -11,7 +11,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: my-electron-todolist
+  executableName: 今日清单
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
