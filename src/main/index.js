@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join, normalize } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { writeFile, getAllFileName, readFile } from './file'
+import { writeFile, readFile } from './file'
 import chokidar from 'chokidar'
 
 function createWindow() {
@@ -38,9 +38,18 @@ function createWindow() {
       })
   })
   ipcMain.on('readFile', (event, path) => {
-    readFile(path).then((res) => {
-      event.sender.send('fileContent', res)
-    })
+    readFile(path)
+      .then((res) => {
+        event.sender.send('fileContent', res)
+      })
+      .catch((err) => {
+        const errArr = `${err.message}`.split('\\')
+        const msg = errArr[errArr.length - 1].slice(0, -1)
+        dialog.showErrorBox(
+          'error message',
+          `The file ${msg} does not exist in the current directory`
+        )
+      })
   })
   ipcMain.on('createFile', (_, data) => {
     writeFile({

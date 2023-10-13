@@ -20,10 +20,20 @@ let fileContent = ref([])
 
 onMounted(() => {
   fileUrl.value = window.localStorage.getItem('fileUrl') || ''
-  getFileNames()
-  getFileContent()
-  window.electronFile.readFile(`${fileUrl.value}\\${dayjs().format('YYYY-MM-DD')}.txt`)
 })
+
+watch(
+  fileUrl,
+  (url) => {
+    if (url) {
+      fileNames.value = []
+      getFileNames(url)
+      getFileContent()
+      window.electronFile.readFile(`${url}\\${dayjs().format('YYYY-MM-DD')}.txt`)
+    }
+  },
+  { immediate: true }
+)
 
 function getFileContent() {
   window.electron.ipcRenderer.on('fileContent', (_, data) => {
@@ -32,14 +42,16 @@ function getFileContent() {
   })
 }
 
-function getFileNames() {
-  window.electronFile.readFileNames(fileUrl.value)
+function getFileNames(url) {
+  window.electronFile.readFileNames(url)
   window.electron.ipcRenderer.on('directoryChanges', (_, data) => {
     const { event, path } = data
     const name = path.split('\\')[path.split('\\').length - 1]
+    const unit = name.split('.')[1]
+
     const code = dayjs(name.split('.')[0]).valueOf()
     const index = fileNames.value.findIndex((item) => item.code === code)
-    if (event == 'add' && index === -1) {
+    if (event == 'add' && index === -1 && unit === 'txt') {
       fileNames.value.unshift({
         name,
         code
